@@ -11,12 +11,20 @@ const R2 = new S3Client({
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-async function sendTelegramMessage(chatId, text) {
+async function sendTelegramMessage(chatId, text, replyMarkup = null) {
   if (!TELEGRAM_TOKEN) return;
+  const payload = { 
+    chat_id: chatId, 
+    text, 
+    parse_mode: "HTML",
+    disable_web_page_preview: true 
+  };
+  if (replyMarkup) payload.reply_markup = replyMarkup;
+
   await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
+    body: JSON.stringify(payload),
   });
 }
 
@@ -57,7 +65,16 @@ export default async function handler(req, res) {
         const text = message.text.trim();
         
         if (text.startsWith('/start') || text.startsWith('/help')) {
-            await sendTelegramMessage(chatId, "Welcome to quickpost!\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short qpst.cc link to share it.");
+            const welcomeText = "<b>Welcome to quickpost!</b>\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short qpst.cc link to share it.";
+            const keyboard = {
+                inline_keyboard: [
+                    [
+                        { text: "View on Github", url: "https://github.com/lunagus/quickpost" },
+                        { text: "Support the project", url: "https://coff.ee/lunagus" }
+                    ]
+                ]
+            };
+            await sendTelegramMessage(chatId, welcomeText, keyboard);
             return res.status(200).send("OK");
         }
 
