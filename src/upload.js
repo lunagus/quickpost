@@ -43,7 +43,8 @@ export function renderUpload(container) {
 
     <div id="view-shorten" class="hidden">
       <div class="editor-wrapper" style="padding: 2rem; text-align: center;">
-        <input type="url" id="shortenInput" class="input-full" placeholder="https://very-long-url.com" style="font-size: 1.1rem; padding: 1rem; margin-bottom: 1rem;">
+        <input type="url" id="shortenInput" class="input-full" placeholder="https://very-long-url.com" style="font-size: 1.1rem; padding: 1rem; margin-bottom: 0.75rem;">
+        <input type="text" id="shortenCustomId" class="input-full" placeholder="Custom Alias (optional)" style="font-size: 1.1rem; padding: 1rem; margin-bottom: 1.5rem;">
         <button id="shortenBtn" class="btn-primary" style="width: 100%;">Shorten URL</button>
         <div id="shortenResult" class="hidden" style="margin-top: 2rem;">
             <div class="url-group">
@@ -222,11 +223,13 @@ function attachEvents() {
   // URL Shortener logic
   const shortenBtn = document.getElementById('shortenBtn');
   const shortenInput = document.getElementById('shortenInput');
+  const shortenCustomId = document.getElementById('shortenCustomId');
   const shortenResult = document.getElementById('shortenResult');
   const shortenUrlInput = document.getElementById('shortenUrlInput');
   
   shortenBtn.onclick = async () => {
       const url = shortenInput.value.trim();
+      const custom_id = shortenCustomId.value.trim();
       if (!url) return alert('Please enter a URL');
       try {
           new URL(url);
@@ -241,7 +244,7 @@ function attachEvents() {
           const res = await fetch('/api/shorten', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-              body: JSON.stringify({ url })
+              body: JSON.stringify({ url, custom_id })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Failed to shorten');
@@ -249,6 +252,7 @@ function attachEvents() {
           shortenUrlInput.value = data.url;
           shortenResult.classList.remove('hidden');
           shortenInput.value = '';
+          shortenCustomId.value = '';
       } catch (err) {
           alert(err.message);
       } finally {

@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { url } = req.body || {};
+    const { url, custom_id } = req.body || {};
 
     if (!url || typeof url !== "string") {
       return res.status(400).json({ error: "Missing or invalid URL" });
@@ -23,8 +23,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Only http/https URLs are allowed" });
     }
 
-    // Generate 3-char random ID
-    const shortId = Math.random().toString(36).substring(2, 5);
+    let shortId;
+    if (custom_id) {
+        if (!/^[a-zA-Z0-9_-]{2,50}$/.test(custom_id)) {
+            return res.status(400).json({ error: "Custom alias must be 2-50 characters (alphanumeric, hyphens, underscores)" });
+        }
+        shortId = custom_id;
+    } else {
+        shortId = Math.random().toString(36).substring(2, 5);
+    }
 
     // Save to Supabase using __URL__ marker
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -47,6 +54,10 @@ export default async function handler(req, res) {
 
     if (!dbResponse.ok) {
       const detail = await dbResponse.text();
+      // Supabase/PostgREST usually returns 409 Conflict for unique constraint violations
+      if (dbResponse.status === 409 || detail.includes("duplicate key value")) {
+          return res.status(409).json({ error: "Alias is already in use. Please try another one." });
+      }
       throw new Error(`Database error: ${detail}`);
     }
 

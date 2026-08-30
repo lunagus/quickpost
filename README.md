@@ -10,7 +10,7 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 
 - **File Upload** -- Select, drag-and-drop, paste from clipboard, or browse one or multiple files. Supports images, PDFs, archives, and any file type up to 50 MB.
 - **Code Snippets** -- Paste text with syntax highlighting for Python, JavaScript, TypeScript, HTML, CSS, JSON, Java, C/C++, SQL, and Markdown.
-- **URL Shortener** -- Paste any long URL and instantly get a `qpst.cc/<id>` link, saving without database bloat.
+- **URL Shortener** -- Paste any long URL and get a `qpst.cc/<id>` link, with support for custom aliases.
 - **QR Code Generator** -- Generate and download QR codes for URLs or text on the fly.
 - **Code Viewer** -- Line numbers, word wrap toggle, download, copy, raw view, re-edit, and language switching.
 - **Short URLs** -- Clean `qpst.cc/<id>` links with optional custom filenames.
