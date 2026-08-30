@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         const text = message.text.trim();
         
         if (text.startsWith('/start') || text.startsWith('/help')) {
-            const welcomeText = "<b>Welcome to quickpost!</b>\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short qpst.cc link to share it.";
+            const welcomeText = "<b>Welcome to quickpost!</b>\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short www.qpst.cc link to share it.";
             const keyboard = {
                 inline_keyboard: [
                     [
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
             await saveToSupabase(shortId, "snippet.txt", storagePath);
         }
         
-        await sendTelegramMessage(chatId, `https://qpst.cc/${shortId}`);
+        await sendTelegramMessage(chatId, `https://www.qpst.cc/${shortId}`);
         return res.status(200).send("OK");
     }
 
@@ -139,16 +139,26 @@ export default async function handler(req, res) {
     const ext = filename.includes(".") ? filename.split(".").pop().toLowerCase() : "bin";
     const storagePath = `${shortId}.${ext}`;
 
+    // Determine basic mime type for images/documents so browser doesn't force download
+    let mime = "application/octet-stream";
+    if (ext === "jpg" || ext === "jpeg") mime = "image/jpeg";
+    else if (ext === "png") mime = "image/png";
+    else if (ext === "gif") mime = "image/gif";
+    else if (ext === "webp") mime = "image/webp";
+    else if (ext === "svg") mime = "image/svg+xml";
+    else if (ext === "pdf") mime = "application/pdf";
+
     await R2.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
         Key: storagePath,
-        Body: buffer
+        Body: buffer,
+        ContentType: mime
     }));
 
     // Register Metadata
     await saveToSupabase(shortId, filename, storagePath);
     
-    await sendTelegramMessage(chatId, `https://qpst.cc/${storagePath}`);
+    await sendTelegramMessage(chatId, `https://www.qpst.cc/${storagePath}`);
     
     return res.status(200).send("OK");
 
