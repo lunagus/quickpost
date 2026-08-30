@@ -1,6 +1,6 @@
 {
   "Version": "16.1.0",
-  "Name": "QuickPost",
+  "Name": "quickpost",
   "DestinationType": "ImageUploader, TextUploader, FileUploader",
   "RequestMethod": "POST",
   "RequestURL": "https://qpst.cc/api/upload",

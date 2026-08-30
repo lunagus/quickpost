@@ -426,8 +426,8 @@ async function uploadSingleFile(file, fileName, btn, prefix = '', isFileUpload =
             baseId = customName;
         }
     } else {
-        // 7-char base36 ID (~78 billion possibilities)
-        baseId = Math.random().toString(36).substring(2, 9);
+        // 3-char base36 ID (~46K possibilities, sufficient for 24h ephemeral files)
+        baseId = Math.random().toString(36).substring(2, 5);
     }
 
     const shortId = baseId;

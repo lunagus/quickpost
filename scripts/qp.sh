@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# qp -- QuickPost CLI uploader
+# qp -- quickpost CLI uploader
 # Uploads files to qpst.cc from the terminal (up to 50 MB).
 #
 # Usage:
@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      echo "qp -- QuickPost CLI uploader"
+      echo "qp -- quickpost CLI uploader"
       echo ""
       echo "Usage:"
       echo "  qp <file>              Upload a file"
@@ -80,9 +80,9 @@ EXT=$(echo "$EXT" | tr '[:upper:]' '[:lower:]')
 
 if [[ -n "$CUSTOM_NAME" ]]; then
   BASE_ID=$(echo "$CUSTOM_NAME" | sed 's/\.[^.]*$//' | sed 's/[^a-zA-Z0-9_-]/_/g')
-  [[ -z "$BASE_ID" ]] && BASE_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 7)
+  [[ -z "$BASE_ID" ]] && BASE_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 3)
 else
-  BASE_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 7)
+  BASE_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | head -c 3)
 fi
 
 STORAGE_PATH="${BASE_ID}.${EXT}"

@@ -1,4 +1,4 @@
-// Shared utilities for QuickPost
+// Shared utilities for quickpost
 
 export const LANGUAGES = [
   { value: 'txt', label: 'Plain Text' },

@@ -1,6 +1,6 @@
 {
-    "name": "QuickPost",
-    "short_name": "QuickPost",
+    "name": "quickpost",
+    "short_name": "quickpost",
     "icons": [
         {
             "src": "/favicons/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ec4899",
+    "theme_color": "#050505",
     "background_color": "#050505",
     "display": "standalone"
 }

@@ -12,12 +12,12 @@ export function renderTerms(container) {
             <h2 style="color: var(--accent); margin-bottom: 1rem;">TERMS OF SERVICE</h2>
             
             <h3>1. Scope and Acceptance</h3>
-            <p>Welcome to QuickPost ("QP", "we", "us"). By accessing or using our website and services (the "Service"), you agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and our Acceptable Use Policy. If you do not agree to these Terms, you may not use the Service.</p>
+            <p>Welcome to quickpost ("QP", "we", "us"). By accessing or using our website and services (the "Service"), you agree to be bound by these Terms of Service ("Terms"), our Privacy Policy, and our Acceptable Use Policy. If you do not agree to these Terms, you may not use the Service.</p>
             <p>We reserve the right to modify these Terms at any time. Continued use of the Service constitutes acceptance of any changes.</p>
 
             <h3>2. Your Content & Permissions</h3>
             <p>You retain full ownership of the files, text, and other data you upload ("Your Content"). However, to provide the Service, you grant us a worldwide, non-exclusive, royalty-free license to use, store, copy, transmit, and display Your Content solely as necessary to operate the Service (e.g., hosting your file and showing it to people you share the link with).</p>
-            <p>We reserve the right to delete any content that violates these Terms or for any other reason at our sole discretion. <strong>You acknowledge that QuickPost is a temporary file hosting service. Files are automatically deleted after 24 hours. We make no guarantees of data persistence.</strong></p>
+            <p>We reserve the right to delete any content that violates these Terms or for any other reason at our sole discretion. <strong>You acknowledge that quickpost is a temporary file hosting service. Files are automatically deleted after 24 hours. We make no guarantees of data persistence.</strong></p>
 
             <h3>3. Responsibilities</h3>
             <p>You are solely responsible for Your Content and your conduct. You represent and warrant that you own or have the necessary rights to all content you upload.</p>
@@ -58,7 +58,7 @@ export function renderTerms(container) {
             <p>We do not sell your personal data. We only share information with third parties when necessary to:</p>
             <ul class="terms-list">
                 <li>Comply with the law (e.g., valid subpoenas, warrants).</li>
-                <li>Protect the rights and safety of QuickPost or its users.</li>
+                <li>Protect the rights and safety of quickpost or its users.</li>
                 <li>Service Providers: We use Supabase (Database) and Cloudflare (Storage) to host the Service.</li>
             </ul>
         </div>
@@ -68,7 +68,7 @@ export function renderTerms(container) {
             <p>We respect intellectual property rights. If you believe your work is being infringed, please use the <strong>"Report Abuse"</strong> button in the footer to submit a claim providing:</p>
             <ul class="terms-list">
                 <li>Identification of the copyrighted work.</li>
-                <li>The URL of the infringing material on QuickPost.</li>
+                <li>The URL of the infringing material on quickpost.</li>
                 <li>Your contact information.</li>
             </ul>
             <p>We will respond expeditiously to remove infringing material in accordance with the Digital Millennium Copyright Act (DMCA).</p>

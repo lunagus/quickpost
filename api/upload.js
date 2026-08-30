@@ -45,9 +45,9 @@ export default async function handler(req, res) {
     if (customName) {
       // Strip extension if user included it, sanitize to safe chars
       baseId = customName.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
-      if (!baseId) baseId = Math.random().toString(36).substring(2, 9);
+      if (!baseId) baseId = Math.random().toString(36).substring(2, 5);
     } else {
-      baseId = Math.random().toString(36).substring(2, 9);
+      baseId = Math.random().toString(36).substring(2, 5);
     }
 
     // Enforce length limit
