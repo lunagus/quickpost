@@ -1,4 +1,4 @@
-# QuickPost
+# quickpost
 
 A lightweight, ephemeral file and code snippet sharing platform. Upload, get a short link, share it. Files auto-delete after 24 hours. No accounts, no tracking.
 
@@ -42,7 +42,7 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 
 Contributions are welcome. If you'd like to improve QuickPost, feel free to submit a Pull Request.
 
-To report bugs or request features: [github.com/lunagus/QuickPost/issues](https://github.com/lunagus/QuickPost/issues)
+To report bugs or request features: [github.com/lunagus/QuickPost/issues](https://github.com/lunagus/quickpost/issues)
 
 ---
 
