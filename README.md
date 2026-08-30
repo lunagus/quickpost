@@ -21,6 +21,13 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 
 ---
 
+## How It Works
+
+1. **Upload Architecture** -- Web and Shell clients request a presigned PUT URL from `/api/upload-url`, upload files directly to Cloudflare R2 (bypassing Vercel's 4.5MB limits), and register metadata in Supabase. The `/api/upload` endpoint provides a single-request alternative for ShareX and standard API usage.
+2. **View Routing** -- The SPA extracts the ID from the URL and fetches metadata from Supabase. It immediately redirects if it's a shortened URL, otherwise it loads the object from R2 and renders it via Prism.js (code) or native tags (images/downloads).
+3. **Automated Expiry** -- Ephemeral storage is enforced via Cloudflare R2 Object Lifecycle rules, which automatically delete all objects 24 hours after creation.
+
+---
 ## API
 
 quickpost exposes a public upload API. No authentication required.
@@ -144,15 +151,7 @@ Metadata registration endpoint used internally by the shell script. Registers a 
 
 ---
 
-## How It Works
 
-1. **Upload (Web)** -- The client requests a presigned PUT URL from `/api/upload-url`, uploads the file directly to R2, then saves metadata (short ID, filename, storage path) to Supabase.
-2. **Upload (API)** -- The serverless function receives the file, uploads to R2 server-side, and saves metadata to Supabase in a single request.
-3. **Upload (Shell)** -- The script gets a presigned URL, PUTs the file directly to R2 (bypassing Vercel), then calls `/api/register` to save metadata.
-4. **View** -- The SPA router extracts the ID from the URL, fetches metadata from Supabase, loads the file from R2, and renders it with syntax highlighting (code) or as an image/download.
-5. **Expiry** -- A scheduled job (configured in R2 lifecycle rules) deletes files after 24 hours.
-
----
 
 ## Roadmap
 
@@ -160,11 +159,14 @@ Metadata registration endpoint used internally by the shell script. Registers a 
 - [x] Code snippet viewer with Prism.js syntax highlighting
 - [x] Upload API with curl and ShareX support
 - [x] Shell script for terminal uploads (up to 50 MB)
+- [x] URL shortener -- Shorten external URLs with custom aliases
+- [x] QR Generator -- Standalone QR code generation
+- [x] OS Integrations -- Right-click upload menus for Windows & macOS
+- [ ] Progressive Web App (PWA) -- Installable native-feeling mobile app
 - [ ] Configurable expiration -- Choose expiry duration (1h, 6h, 12h, 24h, 48h) instead of fixed 24h
 - [ ] Telegram bot -- Upload files via Telegram and receive the share link in chat
 - [ ] Password-protected uploads -- Optional password gate on shared files
 - [ ] Download limits -- Auto-delete after N downloads
-- [ ] URL shortener -- Shorten external URLs alongside file/text uploads
 
 ---
 
