@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         const text = message.text.trim();
         
         if (text.startsWith('/start') || text.startsWith('/help')) {
-            await sendTelegramMessage(chatId, "Welcome to quickpost! 🚀\n\nSend me a photo, file, text snippet, or long URL, and I'll instantly reply with a short qpst.cc link to share it.");
+            await sendTelegramMessage(chatId, "Welcome to quickpost!\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short qpst.cc link to share it.");
             return res.status(200).send("OK");
         }
 
