@@ -131,7 +131,7 @@ export default async function handler(req, res) {
     // Register Metadata
     await saveToSupabase(shortId, filename, storagePath);
     
-    await sendTelegramMessage(chatId, `https://qpst.cc/${shortId}`);
+    await sendTelegramMessage(chatId, `https://qpst.cc/${storagePath}`);
     
     return res.status(200).send("OK");
 
