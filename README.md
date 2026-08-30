@@ -118,6 +118,16 @@ qp --help                    # Show help
 
 Screenshots and files will be uploaded to quickpost automatically, with the share URL copied to your clipboard.
 
+### Telegram Bot (Mobile Uploads)
+
+You can upload files, photos, text snippets, and shorten URLs directly from your phone using the official Telegram bot.
+
+1. Open Telegram and message [@qpst_bot](https://t.me/qpst_bot).
+2. Send any photo, file, text, or long URL to the chat.
+3. The bot will instantly reply with your `qpst.cc/<id>` share link.
+
+*(Note: Telegram imposes a 20MB limit on files sent to bots).*
+
 ### OS Integrations (Right-Click Upload)
 
 You can integrate quickpost directly into your operating system's right-click context menus.
@@ -164,7 +174,7 @@ Metadata registration endpoint used internally by the shell script. Registers a 
 - [x] OS Integrations -- Right-click upload menus for Windows & macOS
 - [ ] Progressive Web App (PWA) -- Installable native-feeling mobile app
 - [ ] Configurable expiration -- Choose expiry duration (1h, 6h, 12h, 24h, 48h) instead of fixed 24h
-- [ ] Telegram bot -- Upload files via Telegram and receive the share link in chat
+- [x] Telegram bot -- Upload files via Telegram and receive the share link in chat
 - [ ] Password-protected uploads -- Optional password gate on shared files
 - [ ] Download limits -- Auto-delete after N downloads
 
