@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         const text = message.text.trim();
         
         if (text.startsWith('/start') || text.startsWith('/help')) {
-            const welcomeText = "<b>Welcome to quickpost!</b>\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short www.qpst.cc link to share it.";
+            const welcomeText = "<b>Welcome to quickpost!</b>\n\nSend me a photo, file, text snippet, or long URL, and I will instantly reply with a short qpst.cc link to share it.";
             const keyboard = {
                 inline_keyboard: [
                     [
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
             await saveToSupabase(shortId, "snippet.txt", storagePath);
         }
         
-        await sendTelegramMessage(chatId, `https://www.qpst.cc/${shortId}`);
+        await sendTelegramMessage(chatId, `https://qpst.cc/${shortId}`);
         return res.status(200).send("OK");
     }
 
@@ -158,7 +158,7 @@ export default async function handler(req, res) {
     // Register Metadata
     await saveToSupabase(shortId, filename, storagePath);
     
-    await sendTelegramMessage(chatId, `https://www.qpst.cc/${storagePath}`);
+    await sendTelegramMessage(chatId, `https://qpst.cc/${storagePath}`);
     
     return res.status(200).send("OK");
 

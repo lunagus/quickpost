@@ -49,7 +49,8 @@ export default async function handler(req, res) {
 
     // Build URL from request headers
     const proto = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    let host = req.headers["x-forwarded-host"] || req.headers.host;
+    if (host.startsWith("www.")) host = host.substring(4);
     const url = `${proto}://${host}/${storage_path}`;
 
     return res.status(200).json({ url, id: short_id, filename: storage_path });

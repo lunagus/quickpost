@@ -95,7 +95,8 @@ export default async function handler(req, res) {
 
     // Build the share URL from request headers (works in dev and prod)
     const proto = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    let host = req.headers["x-forwarded-host"] || req.headers.host;
+    if (host.startsWith("www.")) host = host.substring(4);
     const url = `${proto}://${host}/${storagePath}`;
 
     // Return plain text by default (best for scripting), JSON if requested

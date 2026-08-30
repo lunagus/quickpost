@@ -63,7 +63,8 @@ export default async function handler(req, res) {
 
     // Return the shortened URL
     const proto = req.headers["x-forwarded-proto"] || "https";
-    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    let host = req.headers["x-forwarded-host"] || req.headers.host;
+    if (host.startsWith("www.")) host = host.substring(4);
     const shortUrl = `${proto}://${host}/${shortId}`;
 
     return res.status(200).json({ url: shortUrl, id: shortId });
