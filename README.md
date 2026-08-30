@@ -134,7 +134,7 @@ You can integrate quickpost directly into your operating system's right-click co
 
 **Windows (Send To Menu)**
 1. Ensure you have installed the PowerShell CLI using the script above.
-2. Download and run [windows-sendto.bat](https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/windows-sendto.bat).
+2. Download and run [windows-sendto-quickpost.bat](https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/windows-sendto-quickpost.bat).
 3. You can now right-click any file > **Send to** > **quickpost**. The share link will be automatically copied to your clipboard.
 
 **macOS (Quick Action)**
@@ -172,11 +172,11 @@ Metadata registration endpoint used internally by the shell script. Registers a 
 - [x] URL shortener -- Shorten external URLs with custom aliases
 - [x] QR Generator -- Standalone QR code generation
 - [x] OS Integrations -- Right-click upload menus for Windows & macOS
-- [ ] Progressive Web App (PWA) -- Installable native-feeling mobile app
-- [ ] Configurable expiration -- Choose expiry duration (1h, 6h, 12h, 24h, 48h) instead of fixed 24h
 - [x] Telegram bot -- Upload files via Telegram and receive the share link in chat
+- [ ] Progressive Web App (PWA) -- Installable native-feeling mobile app
+- [ ] Browser Extension -- Right-click upload integration for Chrome/Firefox
+- [ ] Configurable limits -- Choose expiry duration (1h, 6h, 12h, 24h) or auto-delete after N downloads
 - [ ] Password-protected uploads -- Optional password gate on shared files
-- [ ] Download limits -- Auto-delete after N downloads
 
 ---
 
