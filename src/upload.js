@@ -10,6 +10,8 @@ export function renderUpload(container) {
     <div class="tabs">
       <button class="tab-btn active" id="tab-file">File Upload</button>
       <button class="tab-btn" id="tab-text">Paste Text</button>
+      <button class="tab-btn" id="tab-shorten">Shorten URL</button>
+      <button class="tab-btn" id="tab-qr">Generate QR</button>
       <button class="tab-btn" id="tab-history">History</button>
     </div>
 
@@ -26,6 +28,7 @@ export function renderUpload(container) {
       </div>
       <input type="file" id="fileInput" hidden multiple>
     </div>
+
     <div id="view-text" class="hidden">
       <div class="editor-wrapper">
         <div class="editor-header">
@@ -35,6 +38,32 @@ export function renderUpload(container) {
             </select>
         </div>
         <textarea class="code-area" id="codeInput" placeholder="// Paste content..." spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div id="view-shorten" class="hidden">
+      <div class="editor-wrapper" style="padding: 2rem; text-align: center;">
+        <input type="url" id="shortenInput" class="input-full" placeholder="https://very-long-url.com" style="font-size: 1.1rem; padding: 1rem; margin-bottom: 1rem;">
+        <button id="shortenBtn" class="btn-primary" style="width: 100%;">Shorten URL</button>
+        <div id="shortenResult" class="hidden" style="margin-top: 2rem;">
+            <div class="url-group">
+                <input type="text" class="url-input" id="shortenUrlInput" readonly>
+                <div class="url-actions">
+                    <button class="action-btn" id="shortenCopyBtn">Copy</button>
+                    <button class="action-btn" id="shortenQrBtn">QR</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-qr" class="hidden">
+      <div class="editor-wrapper" style="padding: 2rem; text-align: center;">
+        <textarea id="qrTextInput" class="input-full" placeholder="Enter text or URL to generate QR..." style="height: 100px; padding: 1rem; margin-bottom: 1rem; resize: none;"></textarea>
+        <div style="background: white; padding: 1rem; border-radius: 8px; width: fit-content; margin: 0 auto; display: none;" id="qrOutputContainer">
+            <canvas id="qrStandaloneCanvas"></canvas>
+        </div>
+        <button id="qrDownloadBtn" class="btn-primary hidden" style="margin-top: 1rem;">Download QR</button>
       </div>
     </div>
     
@@ -96,37 +125,32 @@ function attachEvents() {
       btn.disabled = false;
   };
 
-  const updateTabs = (activeId) => {
+  const views = ['view-file', 'view-text', 'view-shorten', 'view-qr', 'view-history'];
+  const switchTab = (tabId, viewId, showControls = false) => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(activeId).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      views.forEach(v => {
+          const el = document.getElementById(v);
+          if (el) el.classList.add('hidden');
+      });
+      document.getElementById(viewId).classList.remove('hidden');
+      
+      if (showControls) {
+          uploadControls.classList.remove('hidden');
+          document.getElementById('uploadHistory').classList.remove('hidden');
+      } else {
+          uploadControls.classList.add('hidden');
+          document.getElementById('uploadHistory').classList.add('hidden');
+      }
   };
 
-  document.getElementById('tab-file').onclick = () => {
-    fileView.classList.remove('hidden'); 
-    textView.classList.add('hidden'); 
-    historyView.classList.add('hidden');
-    uploadControls.classList.remove('hidden');
-    document.getElementById('uploadHistory').classList.remove('hidden');
-    updateTabs('tab-file');
-  };
-  
-  document.getElementById('tab-text').onclick = () => {
-    textView.classList.remove('hidden'); 
-    fileView.classList.add('hidden'); 
-    historyView.classList.add('hidden');
-    uploadControls.classList.remove('hidden');
-    document.getElementById('uploadHistory').classList.remove('hidden');
-    updateTabs('tab-text');
-  };
-  
+  document.getElementById('tab-file').onclick = () => switchTab('tab-file', 'view-file', true);
+  document.getElementById('tab-text').onclick = () => switchTab('tab-text', 'view-text', true);
+  document.getElementById('tab-shorten').onclick = () => switchTab('tab-shorten', 'view-shorten', false);
+  document.getElementById('tab-qr').onclick = () => switchTab('tab-qr', 'view-qr', false);
   document.getElementById('tab-history').onclick = () => {
-    renderHistoryList();
-    historyView.classList.remove('hidden'); 
-    fileView.classList.add('hidden'); 
-    textView.classList.add('hidden');
-    uploadControls.classList.add('hidden');
-    document.getElementById('uploadHistory').classList.add('hidden');
-    updateTabs('tab-history');
+      renderHistoryList();
+      switchTab('tab-history', 'view-history', false);
   };
 
   document.getElementById('clearHistoryBtn').onclick = () => {
@@ -194,6 +218,82 @@ function attachEvents() {
       handleUpload();
     }
   });
+
+  // URL Shortener logic
+  const shortenBtn = document.getElementById('shortenBtn');
+  const shortenInput = document.getElementById('shortenInput');
+  const shortenResult = document.getElementById('shortenResult');
+  const shortenUrlInput = document.getElementById('shortenUrlInput');
+  
+  shortenBtn.onclick = async () => {
+      const url = shortenInput.value.trim();
+      if (!url) return alert('Please enter a URL');
+      try {
+          new URL(url);
+      } catch (e) {
+          return alert('Invalid URL. Must include http:// or https://');
+      }
+      
+      shortenBtn.disabled = true;
+      shortenBtn.innerText = 'Shortening...';
+      
+      try {
+          const res = await fetch('/api/shorten', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ url })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to shorten');
+          
+          shortenUrlInput.value = data.url;
+          shortenResult.classList.remove('hidden');
+          shortenInput.value = '';
+      } catch (err) {
+          alert(err.message);
+      } finally {
+          shortenBtn.disabled = false;
+          shortenBtn.innerText = 'Shorten URL';
+      }
+  };
+
+  document.getElementById('shortenCopyBtn').onclick = () => {
+      navigator.clipboard.writeText(shortenUrlInput.value);
+      const btn = document.getElementById('shortenCopyBtn');
+      btn.innerText = 'Copied!';
+      btn.classList.add('success-ring');
+      setTimeout(() => { btn.innerText = 'Copy'; btn.classList.remove('success-ring'); }, 2000);
+  };
+
+  document.getElementById('shortenQrBtn').onclick = () => {
+      document.getElementById('qrModal').classList.remove('hidden');
+      QRCode.toCanvas(document.getElementById('qrCanvas'), shortenUrlInput.value, { width: 250, margin: 1 });
+  };
+
+  // QR Generator logic
+  const qrTextInput = document.getElementById('qrTextInput');
+  const qrOutputContainer = document.getElementById('qrOutputContainer');
+  const qrStandaloneCanvas = document.getElementById('qrStandaloneCanvas');
+  const qrDownloadBtn = document.getElementById('qrDownloadBtn');
+  
+  qrTextInput.oninput = () => {
+      const text = qrTextInput.value.trim();
+      if (!text) {
+          qrOutputContainer.style.display = 'none';
+          qrDownloadBtn.classList.add('hidden');
+          return;
+      }
+      qrOutputContainer.style.display = 'block';
+      qrDownloadBtn.classList.remove('hidden');
+      QRCode.toCanvas(qrStandaloneCanvas, text, { width: 250, margin: 1 });
+  };
+
+  qrDownloadBtn.onclick = () => {
+      const link = document.createElement('a');
+      link.download = 'qrcode.png';
+      link.href = qrStandaloneCanvas.toDataURL();
+      link.click();
+  };
 
   // Global Paste Handler
   document.onpaste = (e) => {

@@ -26,6 +26,12 @@ export async function renderViewer(container, id) {
     return;
   }
 
+  if (file.filename === '__URL__') {
+    container.innerHTML = `<div style="text-align: center; margin-top: 2rem; color: var(--text-muted);">Redirecting to target...</div>`;
+    window.location.replace(file.storage_path);
+    return;
+  }
+
   const publicUrl = `${R2_PUBLIC_URL}/${file.storage_path}`;
   const ext = file.filename.split('.').pop().toLowerCase();
   const isCode = ['js','py','json','html','css','txt','md','sql','ts','c','java'].includes(ext);

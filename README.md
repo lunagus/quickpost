@@ -10,6 +10,8 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 
 - **File Upload** -- Select, drag-and-drop, paste from clipboard, or browse one or multiple files. Supports images, PDFs, archives, and any file type up to 50 MB.
 - **Code Snippets** -- Paste text with syntax highlighting for Python, JavaScript, TypeScript, HTML, CSS, JSON, Java, C/C++, SQL, and Markdown.
+- **URL Shortener** -- Paste any long URL and instantly get a `qpst.cc/<id>` link, saving without database bloat.
+- **QR Code Generator** -- Generate and download QR codes for URLs or text on the fly.
 - **Code Viewer** -- Line numbers, word wrap toggle, download, copy, raw view, re-edit, and language switching.
 - **Short URLs** -- Clean `qpst.cc/<id>` links with optional custom filenames.
 - **QR Codes** -- Generate a scannable QR code for any upload link.
@@ -108,6 +110,23 @@ qp --help                    # Show help
 4. Set quickpost as your active Image/Text/File uploader.
 
 Screenshots and files will be uploaded to quickpost automatically, with the share URL copied to your clipboard.
+
+### OS Integrations (Right-Click Upload)
+
+You can integrate quickpost directly into your operating system's right-click context menus.
+
+**Windows (Send To Menu)**
+1. Ensure you have installed the PowerShell CLI using the script above.
+2. Download and run [windows-sendto.bat](https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/windows-sendto.bat).
+3. You can now right-click any file > **Send to** > **quickpost**. The share link will be automatically copied to your clipboard.
+
+**macOS (Quick Action)**
+1. Ensure you have installed the Bash CLI using the script above.
+2. Open **Automator** and create a new **Quick Action**.
+3. Workflow receives current **files or folders** in **Finder**.
+4. Add a **Run Shell Script** action, pass input **as arguments**.
+5. Paste: `/Users/YOUR_USER/.local/bin/qp "$1" | pbcopy`
+6. Save as "Upload to quickpost". You can now right-click files in Finder to upload!
 
 ### `POST /api/register`
 
