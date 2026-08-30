@@ -1,0 +1,13 @@
+{
+  "Version": "16.1.0",
+  "Name": "QuickPost",
+  "DestinationType": "ImageUploader, TextUploader, FileUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://qpst.cc/api/upload",
+  "Headers": {
+    "Accept": "application/json"
+  },
+  "Body": "MultipartFormData",
+  "FileFormName": "file",
+  "URL": "{json:url}"
+}

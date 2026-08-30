@@ -15,6 +15,52 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 - **QR Codes** -- Generate a scannable QR code for any upload link.
 - **Upload History** -- Client-side history stored in localStorage. Never touches the server.
 - **Direct File Links** -- Image and file URLs resolve directly (e.g., `qpst.cc/abc.png` serves the file).
+- **Upload API** -- REST endpoint for terminal, scripts, and third-party tools (curl, ShareX, Flameshot).
+
+---
+
+## API
+
+### Upload via curl
+
+```bash
+# Upload a file (returns the share URL)
+curl -F file=@screenshot.png https://qpst.cc/api/upload
+
+# Upload with a custom name
+curl -F file=@screenshot.png -F filename=myshot https://qpst.cc/api/upload
+
+# Pipe from stdin
+echo "print('hello')" | curl -F "file=@-;filename=hello.py" https://qpst.cc/api/upload
+
+# Get JSON response
+curl -F file=@image.png -H "Accept: application/json" https://qpst.cc/api/upload
+```
+
+The simple endpoint accepts files up to 4.5 MB. For larger files, use the shell script or the web UI.
+
+### Shell Script (up to 50 MB)
+
+Install:
+
+```bash
+curl -o ~/.local/bin/qp https://raw.githubusercontent.com/lunagus/QuickPost/main/scripts/qp.sh
+chmod +x ~/.local/bin/qp
+```
+
+Usage:
+
+```bash
+qp screenshot.png           # Upload a file, prints URL
+cat code.py | qp             # Pipe from stdin
+qp -n myname notes.md        # Upload with custom name
+```
+
+The shell script uploads directly to storage, bypassing the 4.5 MB API limit.
+
+### ShareX
+
+Download [sharex.sxcu](https://raw.githubusercontent.com/lunagus/QuickPost/main/sharex.sxcu) and import it into ShareX (Destinations > Custom uploader settings > Import).
 
 ---
 
@@ -26,10 +72,8 @@ A lightweight, ephemeral file and code snippet sharing platform. Upload, get a s
 
 ---
 
-## New Features Roadmap
+## Roadmap
 
-- **Upload via curl / shell script** -- A simple `curl -F` one-liner or a lightweight shell script to upload files from the terminal and receive the share link in stdout.
-- **Upload API** -- A proper REST endpoint returning JSON or plain text responses, compatible with ShareX, Flameshot, and other screenshot tools.
 - **Configurable expiration** -- Allow users to choose expiry duration (1h, 6h, 12h, 24h, 48h) instead of a fixed 24-hour window.
 - **Telegram bot** -- Upload files via a Telegram bot and receive the share link in chat.
 - **Password-protected uploads** -- Optional password gate on shared files.
