@@ -381,14 +381,20 @@
     .viewer-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1.5rem;
+        gap: 1rem;
     }
     .viewer-actions {
         width: 100%;
         justify-content: flex-start;
+        gap: 0.5rem;
+    }
+    .viewer-actions select {
+        width: 100%;
+        margin-right: 0 !important;
+        margin-bottom: 0.5rem;
     }
     .action-btn {
-        flex: 1;
+        flex: 1 1 calc(33% - 0.5rem);
         justify-content: center;
         padding: 0.6rem;
     }
@@ -399,7 +405,7 @@
         gap: 1rem;
     }
     .header-btn, .header-link {
-        flex: 1;
+        flex: 1 1 calc(50% - 0.5rem);
         text-align: center;
         justify-content: center;
         display: flex;
@@ -409,4 +415,12 @@
     .footer-separator { display: none; }
     .footer-content { gap: 0.5rem; flex-direction: column; }
     .footer-link, .footer-btn { width: 100%; justify-content: center; }
+    
+    /* Touch target minimums and iOS zoom prevention */
+    .btn-primary, .action-btn, .tab-btn, .header-btn, .header-link, .footer-link, .footer-btn {
+        min-height: 44px;
+    }
+    input, textarea, select {
+        font-size: 16px !important;
+    }
 }
