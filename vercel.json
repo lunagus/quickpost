@@ -2,6 +2,14 @@
   "name": "quickpost",
   "rewrites": [
     {
+      "source": "/install.ps1",
+      "destination": "https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/install.ps1"
+    },
+    {
+      "source": "/install.sh",
+      "destination": "https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/install.sh"
+    },
+    {
       "source": "/:id([a-zA-Z0-9]+)\\.jpg",
       "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.jpg"
     },

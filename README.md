@@ -73,13 +73,17 @@ The `qp` shell script uses a two-step upload flow (presigned URL then direct-to-
 
 **Install:**
 
+Linux / macOS:
+
 ```bash
-# Linux / macOS
-curl -o ~/.local/bin/qp https://raw.githubusercontent.com/lunagus/quickpost/main/scripts/qp.sh
-chmod +x ~/.local/bin/qp
+curl -sL https://qpst.cc/install.sh | bash
 ```
 
-Make sure `~/.local/bin` is in your `PATH`. Alternatively, install to `/usr/local/bin` for system-wide access.
+Windows (PowerShell):
+
+```powershell
+irm https://qpst.cc/install.ps1 | iex
+```
 
 **Usage:**
 
@@ -98,7 +102,7 @@ qp --help                    # Show help
 
 ### ShareX
 
-1. Download [`sharex.sxcu`](https://raw.githubusercontent.com/lunagus/quickpost/main/sharex.sxcu).
+1. Download [`quickpost.sxcu`](https://raw.githubusercontent.com/lunagus/quickpost/main/quickpost.sxcu).
 2. Open ShareX > Destinations > Custom uploader settings.
 3. Click Import > From file, and select the downloaded `.sxcu` file.
 4. Set quickpost as your active Image/Text/File uploader.
