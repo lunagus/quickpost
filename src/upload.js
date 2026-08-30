@@ -297,8 +297,7 @@ function attachEvents() {
 
   // Global Paste Handler
   document.onpaste = (e) => {
-    if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName) && 
-        (document.activeElement.type === 'text' || document.activeElement.tagName === 'TEXTAREA')) {
+    if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName)) {
         return;
     }
     // Switch to upload view if on history
