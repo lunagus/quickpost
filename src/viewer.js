@@ -1,7 +1,20 @@
 import { supabase } from './lib/supabase.js';
+import { formatBytes, buildLangOptions, getPrismLang } from './lib/utils.js';
 import Prism from 'prismjs';
 import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
+
+// Import language grammars (Prism only ships with markup, css, clike, javascript by default)
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-sql';
+
+const R2_PUBLIC_URL = import.meta.env.VITE_R2_PUBLIC_URL || "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev";
 
 export async function renderViewer(container, id) {
   container.innerHTML = `<div>Fetching data...</div>`;
@@ -13,12 +26,9 @@ export async function renderViewer(container, id) {
     return;
   }
 
-  // Use R2 Public URL directly (bypass Supabase Storage which is empty)
-  // We construct it manually since we know the structure
-  const R2_PUBLIC_URL = "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev";
   const publicUrl = `${R2_PUBLIC_URL}/${file.storage_path}`;
   const ext = file.filename.split('.').pop().toLowerCase();
-  const isCode = ['js','py','json','html','css','txt','md','sql'].includes(ext);
+  const isCode = ['js','py','json','html','css','txt','md','sql','ts','c','java'].includes(ext);
 
   if (isCode) {
     const text = await (await fetch(publicUrl)).text();
@@ -52,6 +62,7 @@ function renderCodeViewer(container, text, filename, publicUrl, ext) {
 
   const lines = text.split('\n').length;
   const size = formatBytes(new Blob([text]).size);
+  const prismLang = getPrismLang(ext);
 
   container.innerHTML = `
     <div class="editor-wrapper">
@@ -62,43 +73,33 @@ function renderCodeViewer(container, text, filename, publicUrl, ext) {
           </div>
           <div class="viewer-actions">
               <select id="viewerLangSelect" style="background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); padding: 0.2rem 0.5rem; font-family: inherit; font-size: 0.75rem; margin-right: 0.5rem; cursor: pointer;">
-                  <option value="txt" ${ext === 'txt' ? 'selected' : ''}>Plain Text</option>
-                  <option value="py" ${ext === 'py' ? 'selected' : ''}>Python</option>
-                  <option value="js" ${ext === 'js' ? 'selected' : ''}>JavaScript</option>
-                  <option value="html" ${ext === 'html' ? 'selected' : ''}>HTML</option>
-                  <option value="css" ${ext === 'css' ? 'selected' : ''}>CSS</option>
-                  <option value="json" ${ext === 'json' ? 'selected' : ''}>JSON</option>
-                  <option value="java" ${ext === 'java' ? 'selected' : ''}>Java</option>
-                  <option value="c" ${ext === 'c' ? 'selected' : ''}>C / C++</option>
-                  <option value="ts" ${ext === 'ts' ? 'selected' : ''}>TypeScript</option>
-                  <option value="md" ${ext === 'md' ? 'selected' : ''}>Markdown</option>
-                  <option value="sql" ${ext === 'sql' ? 'selected' : ''}>SQL</option>
+                  ${buildLangOptions(ext)}
               </select>
               <button id="downloadBtn" class="action-btn">DOWNLOAD</button>
               <button id="editBtn" class="action-btn">EDIT</button>
               <button id="wrapBtn" class="action-btn">WRAP: OFF</button>
-              <a href="${publicUrl}" target="_blank" class="action-btn">RAW</a>
+              <a href="${publicUrl}" target="_blank" rel="noopener noreferrer" class="action-btn">RAW</a>
               <button id="copyBtn" class="action-btn">COPY</button>
           </div>
       </div>
-      <pre id="codePre" class="line-numbers"><code class="language-${ext}">${escapeHtml(text)}</code></pre>
+      <pre id="codePre" class="line-numbers"><code class="language-${prismLang}">${escapeHtml(text)}</code></pre>
     </div>
     <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none;">← Upload New</a>
   `;
 
   // Attach Events
-  const downloadBtn = document.getElementById('downloadBtn');
-  downloadBtn.onclick = async () => {
+  document.getElementById('downloadBtn').onclick = () => {
       try {
           const blob = new Blob([text], { type: 'text/plain' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.style.display = 'none';
           a.href = url;
-          a.download = filename; // Force original filename
+          a.download = filename;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
+          a.remove();
       } catch (e) {
           alert('Download failed: ' + e.message);
       }
@@ -141,36 +142,24 @@ function renderCodeViewer(container, text, filename, publicUrl, ext) {
   setTimeout(() => {
     if(window.location.hash && /^#L\d+$/.test(window.location.hash)) {
         const lineNum = parseInt(window.location.hash.substring(2));
-        // Prism adds spans inside .line-numbers-rows, 1-indexed by nth-child
         const lineEl = document.querySelector(`.line-numbers-rows > span:nth-child(${lineNum})`);
         if(lineEl) {
             lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            lineEl.style.backgroundColor = 'rgba(255, 215, 0, 0.3)'; // Highlight line number
-            // Optional: highlight the code line? Hard with Prism layout.
+            lineEl.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
         }
     }
-  }, 500); // Small delay for Prism to render
+  }, 500);
 
-  // Dynamic Syntax Highlighting
+  // Dynamic Syntax Highlighting (re-highlight when language dropdown changes)
   document.getElementById('viewerLangSelect').onchange = (e) => {
-      const newLang = e.target.value;
+      const newExt = e.target.value;
+      const newPrismLang = getPrismLang(newExt);
       const codeEl = document.querySelector('#codePre code');
-      // Reset class
-      codeEl.className = `language-${newLang}`;
-      // Re-highlight
+      codeEl.className = `language-${newPrismLang}`;
       Prism.highlightElement(codeEl);
   };
 }
 
 function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function formatBytes(bytes, decimals = 2) {
-  if (!+bytes) return '0 B';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }

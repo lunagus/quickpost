@@ -25,9 +25,20 @@ export default async function handler(request, response) {
   try {
     const { fileName, fileType } = request.body || {}; // Vercel parses body automatically? dependent on settings usually yes for functions
     
-    if(!fileName || !fileType) {
-         // Fallback for body parsing if needed, but assuming standard Vercel function behavior
-         if(!request.body) return response.status(400).json({ error: 'Missing body' });
+    // Validate fileName: only allow safe characters
+    if (!fileName || typeof fileName !== 'string') {
+      return response.status(400).json({ error: 'Missing fileName' });
+    }
+    if (!fileType || typeof fileType !== 'string') {
+      return response.status(400).json({ error: 'Missing fileType' });
+    }
+    // Block path traversal, null bytes, and unsafe characters
+    if (/[\x00\/\\]/.test(fileName) || fileName.includes('..') || fileName.length > 255) {
+      return response.status(400).json({ error: 'Invalid fileName' });
+    }
+    // Only allow: alphanumeric, hyphens, underscores, single dot before extension
+    if (!/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/.test(fileName)) {
+      return response.status(400).json({ error: 'Invalid fileName format' });
     }
 
     // Use the provided fileName (shortId.ext) directly to keep URLs short

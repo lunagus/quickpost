@@ -3,8 +3,10 @@
 .tab-btn {
     background: none; border: none; padding-bottom: 0.8rem;
     color: var(--text-muted); font-family: inherit; cursor: pointer;
-    font-size: 0.9rem; position: relative;
+    font-size: 0.9rem; position: relative; white-space: nowrap;
+    transition: color 0.2s;
 }
+.tab-btn:hover { color: var(--text); }
 .tab-btn.active { color: var(--text); }
 .tab-btn.active::after {
     content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 1px; background: var(--accent);
@@ -18,6 +20,82 @@
 .upload-box:hover { border-color: var(--border-hover); }
 .upload-box.drag-over { border-color: var(--accent); background: #1a1a1a; }
 
+/* History Cards */
+.history-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    cursor: default;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.history-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.tag {
+    font-size: 0.75rem;
+    background: var(--surface);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+/* URL Input Group */
+.url-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.url-input {
+    width: 100%;
+    padding: 0.8rem;
+    padding-right: 180px;
+    text-overflow: ellipsis;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.url-actions {
+    position: absolute;
+    right: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+.action-btn:hover { background: var(--border); }
+
 /* Code Editor */
 .editor-wrapper {
     background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
@@ -29,13 +107,13 @@
     font-size: 0.85rem; color: var(--text-muted); background: #0a0a0a;
 }
 .header-btn {
-    background: none; border: 1px solid transparent; color: var(--text-muted); 
+    background: none; border: 1px solid transparent; color: var(--text-muted);
     cursor: pointer; font-family: inherit; font-size: 0.75rem; padding: 0.2rem 0.5rem;
     border-radius: 3px; transition: all 0.2s;
 }
 .header-btn:hover { color: var(--text); background: #1a1a1a; border-color: #333; }
 .header-link {
-    color: var(--text-muted); text-decoration: none; font-size: 0.75rem; 
+    color: var(--text-muted); text-decoration: none; font-size: 0.75rem;
     padding: 0.2rem 0.5rem; transition: color 0.2s;
 }
 .header-link:hover { color: var(--text); }
@@ -45,16 +123,41 @@
     color: var(--text); padding: 1rem; font-family: inherit; resize: vertical; outline: none;
 }
 
+/* Viewer Header */
+.viewer-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.viewer-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 /* Buttons & Inputs */
 .btn-primary {
     background: var(--accent); color: var(--bg); border: none; padding: 0.6rem 1.2rem;
     border-radius: var(--radius); cursor: pointer; font-weight: 600; font-family: inherit;
+    transition: opacity 0.2s, filter 0.2s;
 }
+.btn-primary:hover { filter: brightness(0.85); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 .input-minimal {
     background: transparent; border: none; border-bottom: 1px solid var(--border);
     color: var(--text); font-family: inherit; padding: 0.5rem 0; width: 100%;
 }
 .input-minimal:focus { outline: none; border-color: var(--accent); }
+
+.btn-text { background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: inherit; }
+.btn-text:hover { color: var(--text); }
 
 /* Footer */
 .app-footer {
@@ -89,7 +192,7 @@
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s;
-  line-height: 1; /* Fix vertical alignment */
+  line-height: 1;
 }
 
 .footer-btn.primary {
@@ -117,11 +220,6 @@
     background: var(--border);
     margin: 0 0.5rem;
 }
-@media (max-width: 600px) {
-    .footer-separator { display: none; }
-    .footer-content { gap: 0.5rem; }
-    .footer-link, .footer-btn { width: 100%; justify-content: center; } /* Optional: stack links full width? Maybe too aggressive. Let's start with hiding separator */
-}
 
 .footer-text-link {
     background: none;
@@ -146,8 +244,6 @@
   align-items: center;
 }
 
-.hidden { display: none !important; }
-
 .modal-content {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -170,15 +266,11 @@
     margin-bottom: 0.75rem;
     border-radius: 4px;
     font-family: inherit;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 .input-full:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
 
-.btn-text { background: none; border: none; color: var(--text-muted); cursor: pointer; font-family: inherit; }
-.btn-text:hover { color: var(--text); }
-
-
-/* Terms Page Styling */
+/* Terms Page */
 .terms-card {
     max-width: 700px;
     margin: 0 auto;
@@ -236,37 +328,68 @@
     border-top: 1px solid var(--border);
     padding-top: 2rem;
 }
+
 /* Copy Success Animation */
-@keyframes success-pulse {
-    0% { border-color: var(--border); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-    50% { border-color: #4caf50; box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2); }
-    100% { border-color: var(--border); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+.success-ring {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Responsive Overrides */
+.btn-success {
+    background-color: var(--accent) !important;
+    color: var(--bg) !important;
+    border-color: var(--accent) !important;
+}
+
+/* Responsive */
 @media (max-width: 600px) {
-    /* Reduce large gaps/paddings */
-    .tabs { 
-        gap: 0.5rem; 
-        justify-content: space-between; /* Spread tabs evenly */
+    .tabs {
+        gap: 0.5rem;
+        justify-content: space-between;
         overflow-x: auto;
     }
     .tab-btn {
-        flex: 1; /* Make tabs touch target larger */
+        flex: 1;
         text-align: center;
         padding-left: 0;
-        padding-right: 0; 
+        padding-right: 0;
         font-size: 0.85rem;
     }
 
     .upload-box {
-        padding: 2rem 1rem; /* Reduce padding from 4rem 2rem */
+        padding: 2rem 1rem;
     }
 
-    .footer-separator { display: none; }
-    .footer-content { gap: 0.5rem; flex-direction: column; } /* Stack footer */
-    .footer-link, .footer-btn { width: 100%; justify-content: center; } 
-    
+    .url-group {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+    .url-input {
+        padding-right: 0.8rem;
+        text-align: center;
+    }
+    .url-actions {
+        position: static;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .viewer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    .viewer-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.6rem;
+    }
+
     .editor-header {
         flex-direction: column;
         align-items: stretch;
@@ -279,16 +402,8 @@
         display: flex;
         align-items: center;
     }
-}
 
-/* Success Feedback */
-.success-ring {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 8px rgba(236, 72, 153, 0.4) !important;
-}
-
-.btn-success {
-    background-color: var(--accent) !important;
-    color: white !important;
-    border-color: var(--accent) !important;
+    .footer-separator { display: none; }
+    .footer-content { gap: 0.5rem; flex-direction: column; }
+    .footer-link, .footer-btn { width: 100%; justify-content: center; }
 }

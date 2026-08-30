@@ -1,4 +1,5 @@
 import { supabase } from './lib/supabase.js';
+import { formatBytes, buildLangOptions } from './lib/utils.js';
 import QRCode from 'qrcode';
 
 export function renderUpload(container) {
@@ -18,29 +19,19 @@ export function renderUpload(container) {
     <div id="view-file">
       <div class="upload-box" id="dropZone">
         <div style="font-size: 1.5rem; margin-bottom: 1rem;">↓</div>
-        <div>Select, paste or drop file</div>
+        <div>Select, paste or drop files</div>
       </div>
       <div class="upload-box hidden" id="uploadSuccess" style="cursor: default; border-color: var(--accent);">
          <!-- Success content will be injected here -->
       </div>
-      <input type="file" id="fileInput" hidden>
+      <input type="file" id="fileInput" hidden multiple>
     </div>
     <div id="view-text" class="hidden">
       <div class="editor-wrapper">
         <div class="editor-header">
             <span>INPUT</span>
             <select id="langSelect" style="background:var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family:inherit; cursor: pointer; padding: 2px 5px; font-size: 0.8rem;">
-                <option value="txt" selected>Plain Text</option>
-                <option value="py">Python</option>
-                <option value="js">JavaScript</option>
-                <option value="html">HTML</option>
-                <option value="css">CSS</option>
-                <option value="json">JSON</option>
-                <option value="java">Java</option>
-                <option value="c">C / C++</option>
-                <option value="ts">TypeScript</option>
-                <option value="md">Markdown</option>
-                <option value="sql">SQL</option>
+                ${buildLangOptions('txt')}
             </select>
         </div>
         <textarea class="code-area" id="codeInput" placeholder="// Paste content..." spellcheck="false"></textarea>
@@ -49,7 +40,6 @@ export function renderUpload(container) {
     
     <div id="view-history" class="hidden">
         <div id="history-list" style="display: flex; flex-direction: column; gap: 1rem;">
-            <!-- History items will be rendered here -->
             <div style="text-align: center; color: var(--text-muted); padding: 2rem;">No history found.</div>
         </div>
         <button id="clearHistoryBtn" class="btn-text" style="display: block; margin: 2rem auto; font-size: 0.8rem; color: #666;">Clear History</button>
@@ -79,20 +69,27 @@ export function renderUpload(container) {
   attachEvents();
 }
 
+// Track selected files for multi-file support
+let selectedFiles = [];
+
 function attachEvents() {
   const fileView = document.getElementById('view-file');
   const textView = document.getElementById('view-text');
   const historyView = document.getElementById('view-history');
   const uploadControls = document.getElementById('uploadControls');
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const codeInput = document.getElementById('codeInput');
   
   // Helper to reset the form inputs
   const resetForm = () => {
       document.getElementById('customName').value = "";
-      document.getElementById('fileInput').value = ""; 
-      document.getElementById('codeInput').value = ""; 
-      document.getElementById('dropZone').innerHTML = `
+      fileInput.value = ""; 
+      codeInput.value = ""; 
+      selectedFiles = [];
+      dropZone.innerHTML = `
         <div style="font-size: 1.5rem; margin-bottom: 1rem;">↓</div>
-        <div>Select, paste or drop file</div>
+        <div>Select, paste or drop files</div>
       `;
       const btn = document.getElementById('uploadBtn');
       btn.innerText = "Upload";
@@ -104,18 +101,16 @@ function attachEvents() {
       document.getElementById(activeId).classList.add('active');
   };
 
-  document.getElementById('tab-file').onclick = (e) => {
+  document.getElementById('tab-file').onclick = () => {
     fileView.classList.remove('hidden'); 
     textView.classList.add('hidden'); 
     historyView.classList.add('hidden');
     uploadControls.classList.remove('hidden');
-    // Also remove hidden from history stack? No, stack is global to upload views. 
-    // Actually stack might look weird in History tab. Let's hide stack in history tab.
     document.getElementById('uploadHistory').classList.remove('hidden');
     updateTabs('tab-file');
   };
   
-  document.getElementById('tab-text').onclick = (e) => {
+  document.getElementById('tab-text').onclick = () => {
     textView.classList.remove('hidden'); 
     fileView.classList.add('hidden'); 
     historyView.classList.add('hidden');
@@ -124,13 +119,13 @@ function attachEvents() {
     updateTabs('tab-text');
   };
   
-  document.getElementById('tab-history').onclick = (e) => {
+  document.getElementById('tab-history').onclick = () => {
     renderHistoryList();
     historyView.classList.remove('hidden'); 
     fileView.classList.add('hidden'); 
     textView.classList.add('hidden');
-    uploadControls.classList.add('hidden'); // No new upload calc in history
-    document.getElementById('uploadHistory').classList.add('hidden'); // Hide the "Current Session" stack
+    uploadControls.classList.add('hidden');
+    document.getElementById('uploadHistory').classList.add('hidden');
     updateTabs('tab-history');
   };
 
@@ -141,43 +136,69 @@ function attachEvents() {
       }
   };
 
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  
+  // File input change
   dropZone.onclick = () => fileInput.click();
   fileInput.onchange = (e) => {
-    if(e.target.files[0]) dropZone.innerHTML = `<div>SELECTED: ${e.target.files[0].name}</div>`;
+    if (e.target.files.length > 0) {
+      selectedFiles = Array.from(e.target.files);
+      updateDropZoneLabel();
+    }
   };
+
+  // Drag and Drop
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('drag-over');
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      selectedFiles = files;
+      const dt = new DataTransfer();
+      files.forEach(f => dt.items.add(f));
+      fileInput.files = dt.files;
+      updateDropZoneLabel();
+    }
+  });
 
   document.getElementById('uploadBtn').onclick = handleUpload;
   
-  // Close QR Modal logic
+  // Close QR Modal
   document.getElementById('closeQr').onclick = () => document.getElementById('qrModal').classList.add('hidden');
-
-  /* Auto-detect removed as per user request
-  const codeInput = document.getElementById('codeInput');
-  codeInput.addEventListener('input', () => {
-    const text = codeInput.value;
-    const detected = detectLanguage(text);
-    if (detected) {
-      document.getElementById('langSelect').value = detected;
-    }
-  }); 
-  */
 
   // Edit Feature: Check if we have content to edit
   const editContent = localStorage.getItem('qp_edit_content');
   if (editContent) {
       localStorage.removeItem('qp_edit_content');
-      document.getElementById('tab-text').click(); // Reuse click handler for visibility
+      document.getElementById('tab-text').click();
       codeInput.value = editContent;
       codeInput.dispatchEvent(new Event('input'));
   }
 
+  // Ctrl+Enter / Cmd+Enter keyboard shortcut for upload
+  codeInput.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleUpload();
+    }
+  });
+
   // Global Paste Handler
   document.onpaste = (e) => {
     if (['TEXTAREA', 'INPUT'].includes(document.activeElement.tagName) && 
-        document.activeElement.type === 'text' || document.activeElement.tagName === 'TEXTAREA') {
+        (document.activeElement.type === 'text' || document.activeElement.tagName === 'TEXTAREA')) {
         return;
     }
     // Switch to upload view if on history
@@ -194,10 +215,11 @@ function attachEvents() {
             const blob = item.getAsFile();
             const file = new File([blob], `pasted_image_${Date.now()}.png`, { type: item.type });
             document.getElementById('tab-file').click();
+            selectedFiles = [file];
             const dt = new DataTransfer();
             dt.items.add(file);
-            document.getElementById('fileInput').files = dt.files;
-            document.getElementById('dropZone').innerHTML = `<div>SELECTED: ${file.name}</div>`;
+            fileInput.files = dt.files;
+            updateDropZoneLabel();
             return; 
         }
     }
@@ -209,7 +231,6 @@ function attachEvents() {
              item.getAsString((s) => {
                  if(!s.trim()) return;
                  document.getElementById('tab-text').click();
-                 const codeInput = document.getElementById('codeInput');
                  codeInput.value = s;
                  codeInput.dispatchEvent(new Event('input'));
                  codeInput.focus();
@@ -219,14 +240,71 @@ function attachEvents() {
     }
   };
   
-  window.resetForm = resetForm;
+  // Event delegation for result card buttons (no more window globals)
+  document.getElementById('uploadHistory').addEventListener('click', handleHistoryAction);
+
+  // Store resetForm reference
+  window._qpResetForm = resetForm;
+}
+
+function updateDropZoneLabel() {
+  const dropZone = document.getElementById('dropZone');
+  if (selectedFiles.length === 1) {
+    dropZone.innerHTML = `<div>SELECTED: ${selectedFiles[0].name}</div>`;
+  } else if (selectedFiles.length > 1) {
+    dropZone.innerHTML = `<div>SELECTED: ${selectedFiles.length} files</div>`;
+  }
+}
+
+function handleHistoryAction(e) {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  
+  const action = btn.dataset.action;
+  const url = btn.dataset.url;
+  const inputId = btn.dataset.inputId;
+  
+  if (action === 'copy') {
+    const input = document.getElementById(inputId);
+    if (input) {
+      navigator.clipboard.writeText(input.value);
+      input.classList.add('success-ring');
+      setTimeout(() => input.classList.remove('success-ring'), 1000);
+    }
+  } else if (action === 'copy-raw') {
+    copyRaw(btn, url);
+  } else if (action === 'qr') {
+    showQr(url);
+  }
+}
+
+async function copyRaw(btn, url) {
+  try {
+    const text = await (await fetch(url)).text();
+    if (!text) return alert("Content not available");
+    navigator.clipboard.writeText(text);
+    const old = btn.innerText;
+    btn.innerText = 'COPIED';
+    setTimeout(() => btn.innerText = old, 1500);
+  } catch(e) {
+    alert("Failed to copy raw content");
+  }
+}
+
+function showQr(url) {
+  const modal = document.getElementById('qrModal');
+  const canvas = document.getElementById('qrCanvas');
+  modal.classList.remove('hidden');
+  QRCode.toCanvas(canvas, url, { width: 200, margin: 2, color: { dark: '#000000', light: '#ffffff' } }, function (error) {
+    if (error) console.error(error);
+  });
 }
 
 function saveToHistory(item) {
     let history = [];
     try { history = JSON.parse(localStorage.getItem('qp_upload_history') || '[]'); } catch(e){}
     history.unshift(item);
-    if(history.length > 50) history = history.slice(0, 50); // Limit to 50
+    if(history.length > 50) history = history.slice(0, 50);
     localStorage.setItem('qp_upload_history', JSON.stringify(history));
 }
 
@@ -240,7 +318,9 @@ function renderHistoryList() {
         return;
     }
     
-    list.innerHTML = history.map((item, index) => `
+    list.innerHTML = history.map((item, index) => {
+        const inputId = `hist-${index}`;
+        return `
         <div class="upload-box history-card">
             <div class="history-header">
                  <div class="history-meta">
@@ -249,187 +329,191 @@ function renderHistoryList() {
                  </div>
                  <div class="tag">${item.type}</div>
             </div>
-            
              <div class="url-group">
-                <input type="text" value="${item.url}" class="url-input" readonly>
+                <input type="text" value="${item.url}" id="${inputId}" class="url-input" readonly>
                 <div class="url-actions">
-                    <a href="${item.url}" target="_blank" class="action-btn">OPEN</a>
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="action-btn">OPEN</a>
                 </div>
             </div>
         </div>
-    `).join('');
-}
-
-function detectLanguage(code) {
-  if (!code) return null;
-  const trimmed = code.trim();
-  if (/<(!DOCTYPE|html|head|body|div|span|script|style)/i.test(trimmed)) return 'html';
-  if (/^[\{\[][\s\S]*[\}\]]$/.test(trimmed)) { try { JSON.parse(trimmed); return 'json'; } catch(e){} }
-  if (/^([a-z0-9\-_]+|\.|#)[\s\S]*\{[\s\S]*:[^;]+;[\s\S]*\}/i.test(trimmed)) return 'css';
-  if (/(def\s+\w+|import\s+\w+|print\(|if\s+__name__\s*==|class\s+\w+:)/.test(trimmed)) return 'py';
-  if (/(const|let|var|function|=>|console\.log|import\s+.*from|document\.|window\.)/.test(trimmed)) return 'js';
-  if (/\b(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|FROM|WHERE|JOIN)\b/i.test(trimmed)) return 'sql';
-  return 'txt';
+    `}).join('');
 }
 
 async function handleUpload() {
   try {
     const isFile = !document.getElementById('view-file').classList.contains('hidden');
     const customName = document.getElementById('customName').value.trim();
-    let file, fileName;
-
-    // We need to store standard file object logic but maybe cache content for "Raw Copy"
-    let rawContentToCopy = null;
 
     if (isFile) {
-      file = document.getElementById('fileInput').files[0];
-      if (!file) throw new Error("No file selected");
-      fileName = customName || file.name;
-      
-      if(file.size < 1024 * 512) { 
-          try { rawContentToCopy = await file.text(); } catch(e) {}
+      // Multi-file upload
+      if (selectedFiles.length === 0) {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+          selectedFiles = Array.from(fileInput.files);
+        }
       }
+      if (selectedFiles.length === 0) throw new Error("No file selected");
+      
+      const btn = document.getElementById('uploadBtn');
+      const totalFiles = selectedFiles.length;
+      btn.disabled = true;
+      
+      for (let i = 0; i < totalFiles; i++) {
+        const file = selectedFiles[i];
+        const prefix = totalFiles > 1 ? `(${i + 1}/${totalFiles}) ` : '';
+        btn.innerText = `${prefix}Uploading...`;
+        
+        // Only use custom name for single file uploads
+        const name = totalFiles === 1 ? (customName || file.name) : file.name;
+        await uploadSingleFile(file, name, btn, prefix, true);
+      }
+      
+      window._qpResetForm();
+      
     } else {
+      // Text snippet upload
       const codeInput = document.getElementById('codeInput');
       const content = codeInput.value;
       if (!content) throw new Error("Please enter some text");
       
       const ext = document.getElementById('langSelect').value;
-      fileName = customName ? (customName.includes('.') ? customName : `${customName}.${ext}`) : `snippet.${ext}`;
-      file = new File([content], fileName, { type: 'text/plain' });
-      rawContentToCopy = content;
+      const fileName = customName ? (customName.includes('.') ? customName : `${customName}.${ext}`) : `snippet.${ext}`;
+      const file = new File([content], fileName, { type: 'text/plain' });
+      
+      const btn = document.getElementById('uploadBtn');
+      btn.innerText = "Uploading...";
+      btn.disabled = true;
+      
+      await uploadSingleFile(file, fileName, btn, '', false, content);
+      window._qpResetForm();
     }
 
-    // === COMPREHENSIVE CHECKS ===
-    
-    // 0. Check existence
-    if (!file) throw new Error("No file data found.");
+  } catch (err) {
+      console.error(err);
+      alert("Error: " + (err.message || err));
+      const btn = document.getElementById('uploadBtn');
+      if(btn) {
+          btn.innerText = "Upload";
+          btn.disabled = false;
+      }
+  }
+}
 
-    // 1. Size Check (50 MB Limit)
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+async function uploadSingleFile(file, fileName, btn, prefix = '', isFileUpload = true, rawContentOverride = null) {
+    // === VALIDATION ===
+    const MAX_SIZE = 50 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
         throw new Error(`File is too large (${formatBytes(file.size)}). Maximum allowed size is 50MB.`);
     }
-
-    // 2. Empty File Check
     if (file.size === 0) {
         throw new Error("File is empty (0 bytes). Cannot upload.");
     }
-
-    // 3. Filename Length Check
-    // 3. Filename Length Check
     if (fileName.length > 255) {
         throw new Error("Filename is too long. Please rename it to under 255 characters.");
     }
 
     // === FILENAME & PATH CONFIGURATION ===
-    // 1. Get exact extension from the source file (most reliable)
-    //    (For text pastes, we constructed the File object with an extension already)
-    const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : 'txt';
+    const ext = fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : 'txt';
+    const customName = document.getElementById('customName').value.trim();
 
-    // 2. Determine Base ID
     let baseId;
-    if (customName) {
-        // Use custom name. If user typed "image.png" and ext is "png", strip it to avoid "image.png.png"
+    if (customName && selectedFiles.length <= 1) {
         const lowerName = customName.toLowerCase();
         const lowerExt = '.' + ext;
         if (lowerName.endsWith(lowerExt)) {
             baseId = customName.slice(0, -lowerExt.length);
         } else {
-             baseId = customName;
+            baseId = customName;
         }
-        // Minimal sanitization for URL safety (optional but good practice, user accepted '1')
-        // We leave it raw as requested for maximum customisability
     } else {
-        // No custom name? Generate random Short ID
-        baseId = Math.random().toString(36).substring(2, 5);
+        // 7-char base36 ID (~78 billion possibilities)
+        baseId = Math.random().toString(36).substring(2, 9);
     }
 
-    const shortId = baseId; // For DB
+    const shortId = baseId;
     const path = `${baseId}.${ext}`;
-    fileName = path; // Update display name to match the reality of what we store
+    const displayName = path;
 
-    // Show loading state
-    const btn = document.getElementById('uploadBtn');
-    const originalText = btn.innerText;
-    btn.innerText = "Uploading...";
-    btn.disabled = true;
+    // Cache raw content for "Raw Copy" button
+    let rawContentToCopy = rawContentOverride;
+    if (!rawContentToCopy && file.size < 1024 * 512) {
+        try { rawContentToCopy = await file.text(); } catch(e) {}
+    }
 
-    // console.log('DEBUG: Starting upload:', { path, fileName, size: file.size, type: file.type });
-
-    // console.log('DEBUG: Starting upload:', { path, fileName, size: file.size, type: file.type });
-
-    // === R2 UPLOAD LOGIC ===
-    // 1. Get Presigned URL from our new backend
+    // === GET PRESIGNED URL ===
     const presignResponse = await fetch('/api/upload-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName: path, // Use the generated path (shortId.ext) as the unique identifier
-        fileType: file.type
-      })
+      body: JSON.stringify({ fileName: path, fileType: file.type })
     });
 
     if (!presignResponse.ok) {
         throw new Error('Failed to get secure upload URL from server');
     }
     
-    const { uploadUrl, fileName: r2FileName } = await presignResponse.json();
+    const { uploadUrl } = await presignResponse.json();
 
-    // 2. Upload directly to Cloudflare R2
-    const upload = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': file.type
-      }
+    // === UPLOAD TO R2 WITH PROGRESS ===
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          btn.innerText = `${prefix}Uploading... ${pct}%`;
+        }
+      });
+      
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error('Upload to storage failed'));
+        }
+      });
+      
+      xhr.addEventListener('error', () => reject(new Error('Upload to storage failed')));
+      xhr.addEventListener('abort', () => reject(new Error('Upload aborted')));
+      
+      xhr.open('PUT', uploadUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
     });
 
-    if (!upload.ok) {
-        throw new Error('Upload to storage failed');
-    }
-
-    // 3. Save Metadata to Supabase (Database Only, no Storage upload here)
-    // console.log('DEBUG: Inserting database record...');
-    // We store 'r2FileName' or just the path in 'storage_path' - keeping 'path' consistent
-    const { error: dbErr } = await supabase.from('files').insert({ short_id: shortId, filename: fileName, storage_path: path });
-    
+    // === SAVE METADATA TO SUPABASE ===
+    const { error: dbErr } = await supabase.from('files').insert({ short_id: shortId, filename: displayName, storage_path: path });
     if (dbErr) throw dbErr;
 
     // === SUCCESS UI ===
-    // Update Direct Link to use new R2 domain
     const directLink = `https://qpst.cc/${path}`;
-    const showRaw = rawContentToCopy !== null && (ext === 'txt' || ext === 'js' || ext === 'py' || ext === 'html' || ext === 'css' || ext === 'json' || ext === 'sql' || ext === 'md');
+    const showRaw = rawContentToCopy !== null && ['txt','js','py','html','css','json','sql','md','ts','c','java'].includes(ext);
 
-    // === SAVE TO HISTORY ===
     saveToHistory({
-        fileName: fileName,
+        fileName: displayName,
         url: directLink,
         date: new Date().toISOString(),
-        type: isFile ? 'File' : 'Snippet (' + ext + ')'
+        type: isFileUpload ? 'File' : `Snippet (${ext})`
     });
 
-    // Generate Result Card
     const resultCard = document.createElement('div');
     resultCard.className = 'upload-box history-card';
     resultCard.style.marginBottom = '1rem'; 
     
-    // Unique ID for inputs to avoid conflicts
     const resultId = Math.random().toString(36).substring(7);
 
     resultCard.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 0.25rem; width: 100%; text-align: left;">
           <div style="color: var(--accent); font-size: 1rem; font-weight: 700;">UPLOAD COMPLETE</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">File: ${fileName}</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">File: ${displayName}</div>
           
           <div class="url-group">
               <input type="text" value="${directLink}" id="url-${resultId}" class="url-input" readonly>
               
               <div class="url-actions">
-                   <button onclick="showQr('${directLink}')" class="action-btn" title="Show QR Code">QR</button>
-                  ${showRaw ? `<button onclick="copyRaw('${resultId}', '${directLink}')" class="action-btn" title="Copy Raw Content">RAW</button>` : ''}
-                  <button onclick="copyUrl('${resultId}')" class="action-btn">COPY</button>
-                   <a href="${directLink}" target="_blank" class="action-btn">OPEN</a>
+                   <button data-action="qr" data-url="${directLink}" class="action-btn" title="Show QR Code">QR</button>
+                  ${showRaw ? `<button data-action="copy-raw" data-url="${directLink}" class="action-btn" title="Copy Raw Content">RAW</button>` : ''}
+                  <button data-action="copy" data-input-id="url-${resultId}" class="action-btn">COPY</button>
+                   <a href="${directLink}" target="_blank" rel="noopener noreferrer" class="action-btn">OPEN</a>
               </div>
           </div>
           
@@ -439,66 +523,5 @@ async function handleUpload() {
       </div>
     `;
 
-    // Prepend to History Stack (Newest Top)
-    const history = document.getElementById('uploadHistory');
-    history.prepend(resultCard);
-
-    // Reset Form for next upload
-    window.resetForm();
-
-    // Window helper functions for buttons (updated for IDs)
-    window.copyUrl = (id) => {
-      const input = document.getElementById(`url-${id}`);
-      input.select();
-      navigator.clipboard.writeText(input.value);
-      input.classList.add('success-ring');
-      setTimeout(() => input.classList.remove('success-ring'), 1000);
-    };
-
-    // Note: copyRaw logic needs raw content. For simplicity in multi-card UI, we fetch it if not cached, 
-    // or we could attach it to the DOM. Fetching is safer/cleaner.
-    window.copyRaw = async (id, url) => {
-        try {
-            const text = await (await fetch(url)).text();
-            if(!text) return alert("Content not available");
-            navigator.clipboard.writeText(text);
-            const btn = document.querySelector(`button[onclick="copyRaw('${id}', '${url}')"]`);
-            if(btn) { 
-                const old = btn.innerText; 
-                btn.innerText = 'COPIED'; 
-                setTimeout(() => btn.innerText = old, 1500); 
-            }
-        } catch(e) {
-            alert("Failed to copy raw content");
-        }
-    };
-
-    window.showQr = (url) => {
-        const modal = document.getElementById('qrModal');
-        const canvas = document.getElementById('qrCanvas');
-        modal.classList.remove('hidden');
-        QRCode.toCanvas(canvas, url, { width: 200, margin: 2, color: { dark: '#000000', light: '#ffffff' } }, function (error) {
-          if (error) console.error(error);
-        });
-    };
-
-  } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
-      // Reset button state
-      const btn = document.getElementById('uploadBtn');
-      if(btn) {
-          btn.innerText = "Upload";
-          btn.disabled = false;
-      }
-  }
-}
-
-function formatBytes(bytes, decimals = 2) {
-  if (!+bytes) return '0 B';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    document.getElementById('uploadHistory').prepend(resultCard);
 }

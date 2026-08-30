@@ -59,13 +59,13 @@ export function renderTerms(container) {
             <ul class="terms-list">
                 <li>Comply with the law (e.g., valid subpoenas, warrants).</li>
                 <li>Protect the rights and safety of QuickPost or its users.</li>
-                <li>Service Providers: We use Supabase (Database/Storage) to host the Service.</li>
+                <li>Service Providers: We use Supabase (Database) and Cloudflare (Storage) to host the Service.</li>
             </ul>
         </div>
 
         <div class="terms-section">
             <h2 style="color: var(--accent); margin-bottom: 1rem; margin-top: 3rem;">DMCA / COPYRIGHT POLICY</h2>
-            <p>We respect intellectual property rights. If you believe your work isn being infringed, please use the <strong>"Report Abuse"</strong> button in the footer to submit a claim providing:</p>
+            <p>We respect intellectual property rights. If you believe your work is being infringed, please use the <strong>"Report Abuse"</strong> button in the footer to submit a claim providing:</p>
             <ul class="terms-list">
                 <li>Identification of the copyrighted work.</li>
                 <li>The URL of the infringing material on QuickPost.</li>
