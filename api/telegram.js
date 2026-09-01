@@ -106,7 +106,7 @@ export default async function handler(req, res) {
         return res.status(200).send("OK");
     }
 
-    // Handle File (Document / Photo)
+    // Handle File (Document / Photo / Video)
     let fileId, filename;
     if (message.document) {
         fileId = message.document.file_id;
@@ -115,8 +115,14 @@ export default async function handler(req, res) {
         // Get highest resolution photo (last in array)
         fileId = message.photo[message.photo.length - 1].file_id;
         filename = "photo.jpg";
+    } else if (message.video) {
+        fileId = message.video.file_id;
+        filename = message.video.file_name || "video.mp4";
+    } else if (message.animation) {
+        fileId = message.animation.file_id;
+        filename = message.animation.file_name || "animation.gif";
     } else {
-        await sendTelegramMessage(chatId, "Unsupported message type. Send text, URLs, photos, or documents.");
+        await sendTelegramMessage(chatId, "Unsupported message type. Send text, URLs, photos, videos, or documents.");
         return res.status(200).send("OK");
     }
 
@@ -147,6 +153,10 @@ export default async function handler(req, res) {
     else if (ext === "webp") mime = "image/webp";
     else if (ext === "svg") mime = "image/svg+xml";
     else if (ext === "pdf") mime = "application/pdf";
+    else if (ext === "mp4") mime = "video/mp4";
+    else if (ext === "webm") mime = "video/webm";
+    else if (ext === "mov") mime = "video/quicktime";
+    else if (ext === "mkv") mime = "video/x-matroska";
 
     await R2.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,

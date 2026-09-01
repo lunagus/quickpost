@@ -42,6 +42,22 @@
       "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.pdf"
     },
     {
+      "source": "/:id([a-zA-Z0-9]+)\\.mp4",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.mp4"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.webm",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.webm"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.mov",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.mov"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.mkv",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.mkv"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

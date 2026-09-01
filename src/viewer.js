@@ -50,6 +50,16 @@ export async function renderViewer(container, id) {
         </div>
         <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none; text-align: center;">← Upload New</a>
     `;
+  } else if (['mp4', 'webm', 'mov', 'mkv', 'ogg'].includes(ext)) {
+    // Video Viewer
+    container.innerHTML = `
+        <div class="upload-box" style="cursor: default; padding: 2rem;">
+            <div style="margin-bottom: 1rem; font-weight: 600;">${file.filename}</div>
+            <video src="${publicUrl}" controls playsinline style="max-width: 100%; max-height: 70vh; border-radius: var(--radius); border: 1px solid var(--border); display: block; margin: 0 auto 1rem auto;"></video>
+            <a href="${publicUrl}" class="btn-primary" download>Download Original</a>
+        </div>
+        <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none; text-align: center;">← Upload New</a>
+    `;
   } else {
     // Basic download button for other files
     container.innerHTML = `
