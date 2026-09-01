@@ -106,7 +106,7 @@ export default async function handler(req, res) {
         return res.status(200).send("OK");
     }
 
-    // Handle File (Document / Photo / Video)
+    // Handle File (Document / Photo / Video / Audio)
     let fileId, filename;
     if (message.document) {
         fileId = message.document.file_id;
@@ -121,8 +121,14 @@ export default async function handler(req, res) {
     } else if (message.animation) {
         fileId = message.animation.file_id;
         filename = message.animation.file_name || "animation.gif";
+    } else if (message.audio) {
+        fileId = message.audio.file_id;
+        filename = message.audio.file_name || "audio.mp3";
+    } else if (message.voice) {
+        fileId = message.voice.file_id;
+        filename = "voice.ogg";
     } else {
-        await sendTelegramMessage(chatId, "Unsupported message type. Send text, URLs, photos, videos, or documents.");
+        await sendTelegramMessage(chatId, "Unsupported message type. Send text, URLs, photos, videos, audio, or documents.");
         return res.status(200).send("OK");
     }
 
@@ -157,6 +163,11 @@ export default async function handler(req, res) {
     else if (ext === "webm") mime = "video/webm";
     else if (ext === "mov") mime = "video/quicktime";
     else if (ext === "mkv") mime = "video/x-matroska";
+    else if (ext === "mp3") mime = "audio/mpeg";
+    else if (ext === "ogg") mime = "audio/ogg";
+    else if (ext === "wav") mime = "audio/wav";
+    else if (ext === "m4a" || ext === "aac") mime = "audio/aac";
+    else if (ext === "flac") mime = "audio/flac";
 
     await R2.send(new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,

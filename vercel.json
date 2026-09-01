@@ -58,6 +58,30 @@
       "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.mkv"
     },
     {
+      "source": "/:id([a-zA-Z0-9]+)\\.mp3",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.mp3"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.wav",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.wav"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.ogg",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.ogg"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.m4a",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.m4a"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.aac",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.aac"
+    },
+    {
+      "source": "/:id([a-zA-Z0-9]+)\\.flac",
+      "destination": "https://pub-5a982d0ce8c9473bb5fabdc82a76e57e.r2.dev/:id.flac"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

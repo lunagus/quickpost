@@ -60,6 +60,26 @@ export async function renderViewer(container, id) {
         </div>
         <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none; text-align: center;">← Upload New</a>
     `;
+  } else if (['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'].includes(ext)) {
+    // Audio Viewer
+    container.innerHTML = `
+        <div class="upload-box" style="cursor: default; padding: 2rem;">
+            <div style="margin-bottom: 1rem; font-weight: 600;">${file.filename}</div>
+            <audio src="${publicUrl}" controls style="width: 100%; max-width: 500px; display: block; margin: 0 auto 1rem auto;"></audio>
+            <a href="${publicUrl}" class="btn-primary" download>Download Original</a>
+        </div>
+        <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none; text-align: center;">← Upload New</a>
+    `;
+  } else if (ext === 'pdf') {
+    // PDF Viewer
+    container.innerHTML = `
+        <div class="upload-box" style="cursor: default; padding: 1rem; height: 75vh; display: flex; flex-direction: column;">
+            <div style="margin-bottom: 1rem; font-weight: 600;">${file.filename}</div>
+            <iframe src="${publicUrl}" style="flex: 1; width: 100%; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem;"></iframe>
+            <a href="${publicUrl}" class="btn-primary" download>Download Original</a>
+        </div>
+        <a href="/" style="display:block; margin-top:2rem; color:#666; text-decoration:none; text-align: center;">← Upload New</a>
+    `;
   } else {
     // Basic download button for other files
     container.innerHTML = `
